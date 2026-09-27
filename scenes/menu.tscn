@@ -1,0 +1,79 @@
+[gd_scene format=3 uid="uid://bey12jwhfiub7"]
+
+[ext_resource type="Script" uid="uid://dxsgof1scpkyw" path="res://scenes/menu.gd" id="1_yqeox"]
+
+[node name="menu" type="Control" unique_id=2015720615]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_yqeox")
+
+[node name="main_view" type="VBoxContainer" parent="." unique_id=1243342284]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="btn_official" type="Button" parent="main_view" unique_id=1638359504]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+text = "official levels"
+
+[node name="btn_custom" type="Button" parent="main_view" unique_id=1674169679]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+text = "custom levels"
+
+[node name="btn_endless" type="Button" parent="main_view" unique_id=369888741]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+text = "endless levels"
+
+[node name="btn_exit" type="Button" parent="main_view" unique_id=1246508740]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+text = "exit"
+
+[node name="levels_view" type="VBoxContainer" parent="." unique_id=1932279136]
+visible = false
+custom_minimum_size = Vector2(350, 400)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="title_label" type="Label" parent="levels_view" unique_id=1523320111]
+layout_mode = 2
+text = "select file"
+
+[node name="scroll" type="ScrollContainer" parent="levels_view" unique_id=1974482181]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="level_list" type="VBoxContainer" parent="levels_view/scroll" unique_id=592053424]
+layout_mode = 2
+
+[node name="btn_back" type="Button" parent="levels_view" unique_id=1152209650]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+text = "back"

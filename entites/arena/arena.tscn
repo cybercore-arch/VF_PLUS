@@ -1,0 +1,98 @@
+[gd_scene format=3 uid="uid://eeq5vwakg8wf"]
+
+[ext_resource type="Script" uid="uid://3c6fmgbgpy7c" path="res://entites/arena/arena.gd" id="1_4aug0"]
+[ext_resource type="PackedScene" uid="uid://b2q8whxcwepn4" path="res://entites/player/player.tscn" id="1_n3wug"]
+[ext_resource type="Script" uid="uid://c5tfvd3uls3gs" path="res://core/pattern_manager.gd" id="3_nsdg7"]
+
+[node name="arena" type="Node2D" unique_id=106629649]
+script = ExtResource("1_4aug0")
+
+[node name="player" parent="." unique_id=1558914158 instance=ExtResource("1_n3wug")]
+
+[node name="bullet_container" type="Node2D" parent="." unique_id=1545282637]
+
+[node name="test_spawn_timer" type="Timer" parent="." unique_id=2012525259]
+wait_time = 2.0
+autostart = true
+
+[node name="pattern_manager" type="Node" parent="." unique_id=842763068 node_paths=PackedStringArray("arena")]
+script = ExtResource("3_nsdg7")
+arena = NodePath("..")
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=318485035]
+process_mode = 3
+
+[node name="pause_menu" type="VBoxContainer" parent="UI" unique_id=227818425]
+visible = false
+custom_minimum_size = Vector2(240, 0)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -33.5
+offset_top = -64.0
+offset_right = 33.5
+offset_bottom = 64.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="UI/pause_menu" unique_id=1127865130]
+layout_mode = 2
+text = "paused"
+horizontal_alignment = 1
+
+[node name="btn_resume" type="Button" parent="UI/pause_menu" unique_id=159583534]
+layout_mode = 2
+text = "resume"
+
+[node name="btn_pause_restart" type="Button" parent="UI/pause_menu" unique_id=1691335194]
+layout_mode = 2
+text = "restart"
+
+[node name="btn_pause_menu" type="Button" parent="UI/pause_menu" unique_id=295239759]
+layout_mode = 2
+text = "menu"
+
+[node name="restart_menu" type="VBoxContainer" parent="UI" unique_id=1827570210]
+visible = false
+custom_minimum_size = Vector2(240, 0)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -33.5
+offset_top = -64.0
+offset_right = 33.5
+offset_bottom = 64.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="UI/restart_menu" unique_id=1540069061]
+layout_mode = 2
+text = "game over"
+horizontal_alignment = 1
+
+[node name="btn_death_restart" type="Button" parent="UI/restart_menu" unique_id=1097983944]
+layout_mode = 2
+text = "restart"
+
+[node name="btn_death_menu" type="Button" parent="UI/restart_menu" unique_id=291465153]
+layout_mode = 2
+text = "menu"
+
+[node name="timer_label" type="Label" parent="UI" unique_id=1460373818]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -209.97998
+offset_top = 20.0
+offset_right = -39.97998
+offset_bottom = 89.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 50
+text = "00:00.0"
+horizontal_alignment = 2
+
+[connection signal="timeout" from="test_spawn_timer" to="." method="_on_test_spawn_timer_timeout"]

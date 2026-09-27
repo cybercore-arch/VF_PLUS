@@ -1,0 +1,14 @@
+{
+  "events": [
+	{
+	  "time": 0.5,
+	  "pattern": "loop",
+	  "params": {
+		"target_pattern": "random",
+		"repeat": -1,
+		"interval": 1.0,
+		"params": {}
+	  }
+	}
+  ]
+}
