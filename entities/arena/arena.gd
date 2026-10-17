@@ -14,6 +14,7 @@ func _ready() -> void:
 	get_tree().paused = false
 	survival_time = 0.0
 	
+	$UI.pause_toggle_requested.connect(_on_pause_toggle_requested)
 	$UI/pause_menu/btn_resume.pressed.connect(toggle_pause)
 	$UI/pause_menu/btn_pause_restart.pressed.connect(restart_level)
 	$UI/pause_menu/btn_pause_menu.pressed.connect(go_to_menu)
@@ -29,10 +30,9 @@ func _ready() -> void:
 	if GameManager.current_level_path != "":
 		$pattern_manager.load_level(GameManager.current_level_path)
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_SPACE and not is_game_over:
-			toggle_pause()
+func _on_pause_toggle_requested() -> void:
+	if not is_game_over:
+		toggle_pause()
 
 func toggle_pause() -> void:
 	var new_state = not get_tree().paused

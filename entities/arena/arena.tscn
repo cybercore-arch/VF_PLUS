@@ -1,8 +1,9 @@
 [gd_scene format=3 uid="uid://eeq5vwakg8wf"]
 
-[ext_resource type="Script" uid="uid://3c6fmgbgpy7c" path="res://entites/arena/arena.gd" id="1_4aug0"]
-[ext_resource type="PackedScene" uid="uid://b2q8whxcwepn4" path="res://entites/player/player.tscn" id="1_n3wug"]
+[ext_resource type="Script" uid="uid://3c6fmgbgpy7c" path="res://entities/arena/arena.gd" id="1_4aug0"]
+[ext_resource type="PackedScene" uid="uid://b2q8whxcwepn4" path="res://entities/player/player.tscn" id="1_n3wug"]
 [ext_resource type="Script" uid="uid://c5tfvd3uls3gs" path="res://core/pattern_manager.gd" id="3_nsdg7"]
+[ext_resource type="Script" path="res://entities/arena/ui.gd" id="4_uiscr"]
 
 [node name="arena" type="Node2D" unique_id=106629649]
 script = ExtResource("1_4aug0")
@@ -11,16 +12,13 @@ script = ExtResource("1_4aug0")
 
 [node name="bullet_container" type="Node2D" parent="." unique_id=1545282637]
 
-[node name="test_spawn_timer" type="Timer" parent="." unique_id=2012525259]
-wait_time = 2.0
-autostart = true
-
 [node name="pattern_manager" type="Node" parent="." unique_id=842763068 node_paths=PackedStringArray("arena")]
 script = ExtResource("3_nsdg7")
 arena = NodePath("..")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=318485035]
 process_mode = 3
+script = ExtResource("4_uiscr")
 
 [node name="pause_menu" type="VBoxContainer" parent="UI" unique_id=227818425]
 visible = false
@@ -94,5 +92,3 @@ grow_horizontal = 0
 theme_override_font_sizes/font_size = 50
 text = "00:00.0"
 horizontal_alignment = 2
-
-[connection signal="timeout" from="test_spawn_timer" to="." method="_on_test_spawn_timer_timeout"]
