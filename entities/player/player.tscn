@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://b2q8whxcwepn4"]
 
 [ext_resource type="Texture2D" uid="uid://d0btq87g8npll" path="res://assets/sprites/circleBlack.png" id="1_gxcxq"]
-[ext_resource type="Script" uid="uid://12qieof3a3hc" path="res://entites/player/player.gd" id="1_qevvu"]
+[ext_resource type="Script" uid="uid://12qieof3a3hc" path="res://entities/player/player.gd" id="1_qevvu"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_c3df8"]
 radius = 26.067503

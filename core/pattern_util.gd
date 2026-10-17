@@ -4,8 +4,8 @@ extends RefCounted
 ## Паттерн должен быть `extends RefCounted` и иметь `func execute(arena, params)`.
 
 const DOT_TEXTURE: Texture2D = preload("res://assets/sprites/circleWhite.png")
-const BULLET_SCENE: PackedScene = preload("res://entites/bullet/bullet.tscn")
-const INTERNAL_DIR := "res://entites/attacks/"
+const BULLET_SCENE: PackedScene = preload("res://entities/bullet/bullet.tscn")
+const INTERNAL_DIR := "res://entities/attacks/"
 const DEFAULT_POS := Vector2(640.0, 360.0)
 
 ## Список встроенных паттернов. Нужен как запасной вариант: в экспортной сборке

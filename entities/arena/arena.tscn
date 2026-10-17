@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://eeq5vwakg8wf"]
 
-[ext_resource type="Script" uid="uid://3c6fmgbgpy7c" path="res://entites/arena/arena.gd" id="1_4aug0"]
-[ext_resource type="PackedScene" uid="uid://b2q8whxcwepn4" path="res://entites/player/player.tscn" id="1_n3wug"]
+[ext_resource type="Script" uid="uid://3c6fmgbgpy7c" path="res://entities/arena/arena.gd" id="1_4aug0"]
+[ext_resource type="PackedScene" uid="uid://b2q8whxcwepn4" path="res://entities/player/player.tscn" id="1_n3wug"]
 [ext_resource type="Script" uid="uid://c5tfvd3uls3gs" path="res://core/pattern_manager.gd" id="3_nsdg7"]
-[ext_resource type="Script" path="res://entites/arena/ui.gd" id="4_uiscr"]
+[ext_resource type="Script" path="res://entities/arena/ui.gd" id="4_uiscr"]
 
 [node name="arena" type="Node2D" unique_id=106629649]
 script = ExtResource("1_4aug0")

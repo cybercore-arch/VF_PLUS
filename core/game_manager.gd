@@ -4,7 +4,7 @@ var current_level_path: String = ""
 
 func start_level(path: String) -> void:
 	current_level_path = path
-	get_tree().change_scene_to_file("res://entites/arena/arena.tscn")
+	get_tree().change_scene_to_file("res://entities/arena/arena.tscn")
 
 func scan_folder(folder_path: String) -> Array[String]:
 	var result: Array[String] = []
