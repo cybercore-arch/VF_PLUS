@@ -5,11 +5,13 @@ signal died
 
 var screen_size: Vector2
 var is_alive: bool = true
-var target_position = global_position
+var target_position: Vector2
 var smoothness: float = 25.0
 
 func _ready() -> void:
 	screen_size = get_viewport_rect().size
+	# global_position в инициализаторе переменной ещё равен (0, 0): узла нет в сцене.
+	target_position = global_position
 
 func _input(event: InputEvent) -> void:
 	if not is_alive:

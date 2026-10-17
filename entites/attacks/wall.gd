@@ -1,69 +1,28 @@
-extends Node
-
-const BULLET_SCENE = preload("res://entites/bullet/bullet.tscn")
-
-func _arena_alive(a) -> bool:
-	return is_instance_valid(a) and a is Node2D and a.is_inside_tree()
-
-func _get_side_geometry(side: String, viewport_size: Vector2) -> Dictionary:
-	match side:
-		"bottom":
-			return { "length": viewport_size.x, "fixed": viewport_size.y, "dir": Vector2.UP, "horizontal": true }
-		"left":
-			return { "length": viewport_size.y, "fixed": 0.0, "dir": Vector2.RIGHT, "horizontal": false }
-		"right":
-			return { "length": viewport_size.y, "fixed": viewport_size.x, "dir": Vector2.LEFT, "horizontal": false }
-	return { "length": viewport_size.x, "fixed": 0.0, "dir": Vector2.DOWN, "horizontal": true }
-
-func _wall_spawn_position(t: float, geo: Dictionary, inset: float) -> Vector2:
-	if geo["horizontal"]:
-		var y: float
-		if geo["dir"] == Vector2.DOWN:
-			y = geo["fixed"] + inset
-		else:
-			y = geo["fixed"] - inset
-		return Vector2(t, y)
-	var x: float
-	if geo["dir"] == Vector2.RIGHT:
-		x = geo["fixed"] + inset
-	else:
-		x = geo["fixed"] - inset
-	return Vector2(x, t)
-
-func _make_telegraph_line(arena: Node2D, a: Vector2, b: Vector2, color: Color, width: float) -> Line2D:
-	var line: Line2D = Line2D.new()
-	line.add_point(a)
-	line.add_point(b)
-	line.width = width
-	line.default_color = color
-	arena.add_child(line)
-	return line
+extends RefCounted
 
 func execute(arena: Node2D, params: Dictionary) -> void:
-	if not _arena_alive(arena):
+	if not PatternUtil.arena_alive(arena):
 		return
-
-	var tree: SceneTree = arena.get_tree()
 
 	var viewport_size: Vector2 = arena.get_viewport_rect().size
 	var side: String = params.get("side", "top")
-	var geo: Dictionary = _get_side_geometry(side, viewport_size)
+	var geo: Dictionary = PatternUtil.side_geometry(side, viewport_size)
 	var wall_length: float = geo["length"]
 	var wall_dir: Vector2 = geo["dir"]
 	var horizontal: bool = geo["horizontal"]
 	var fixed_coord: float = geo["fixed"]
 
 	var delay: float = params.get("delay", 0.7)
-	var spacing: float = params.get("spacing", 40.0)
+	var spacing: float = maxf(params.get("spacing", 40.0), 1.0)
 	var gap_size: float = minf(params.get("gap_size", 140.0), wall_length * 0.9)
 	var gap_pos_param = params.get("gap_pos", 0.5)
 	var gap_random: bool = params.get("gap_random", false)
 	var gap_slide: float = params.get("gap_slide", 0.0)
 	var speed: float = params.get("speed", 200.0)
-	var waves: int = params.get("waves", 1)
+	var waves: int = maxi(int(params.get("waves", 1)), 1)
 	var wave_interval: float = params.get("wave_interval", 1.0)
 	var spawn_inset: float = params.get("spawn_offset", 1.0)
-	var telegraph_color: Color = params.get("telegraph_color", Color(1.0, 0.3, 0.3, 0.6))
+	var telegraph_color: Color = PatternUtil.to_color(params.get("telegraph_color"), Color(1.0, 0.3, 0.3, 0.6))
 	var telegraph_width: float = params.get("telegraph_width", 6.0)
 
 	var gap_half: float = gap_size * 0.5
@@ -74,7 +33,7 @@ func execute(arena: Node2D, params: Dictionary) -> void:
 		current_gap_center = float(gap_pos_param) * wall_length
 
 	for wave in range(waves):
-		if not _arena_alive(arena):
+		if not PatternUtil.arena_alive(arena):
 			return
 
 		if wave > 0:
@@ -104,31 +63,24 @@ func execute(arena: Node2D, params: Dictionary) -> void:
 
 		var lines: Array[Line2D] = []
 		if gap_start > 0.0:
-			lines.append(_make_telegraph_line(arena, edge_a, gap_a, telegraph_color, telegraph_width))
+			lines.append(PatternUtil.make_line(arena, edge_a, gap_a, telegraph_color, telegraph_width))
 		if gap_end < wall_length:
-			lines.append(_make_telegraph_line(arena, gap_b, edge_b, telegraph_color, telegraph_width))
+			lines.append(PatternUtil.make_line(arena, gap_b, edge_b, telegraph_color, telegraph_width))
 
-		await tree.create_timer(delay).timeout
+		await PatternUtil.wait(arena, delay)
 
 		for line in lines:
-			if is_instance_valid(line):
-				line.queue_free()
+			PatternUtil.free_node(line)
 
-		if not _arena_alive(arena):
+		if not PatternUtil.arena_alive(arena):
 			return
 
 		var t: float = 0.0
 		while t <= wall_length:
-			if not _arena_alive(arena):
-				return
 			if t < gap_start or t > gap_end:
-				var pos: Vector2 = _wall_spawn_position(t, geo, spawn_inset)
-				var bullet = BULLET_SCENE.instantiate()
-				bullet.global_position = pos
-				bullet.direction = wall_dir
-				bullet.speed = speed
-				arena.bullet_container.add_child(bullet)
+				var pos: Vector2 = PatternUtil.side_pos(t, geo, spawn_inset)
+				PatternUtil.spawn_bullet(arena, pos, wall_dir, speed)
 			t += spacing
 
 		if wave < waves - 1:
-			await tree.create_timer(wave_interval).timeout
+			await PatternUtil.wait(arena, wave_interval)

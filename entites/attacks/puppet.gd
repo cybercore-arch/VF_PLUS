@@ -1,28 +1,14 @@
-extends Node
-
-const DOT_TEXTURE = preload("res://assets/sprites/circleWhite.png")
-const BULLET_SCENE = preload("res://entites/bullet/bullet.tscn")
-
-func _arena_alive(a) -> bool:
-	return is_instance_valid(a) and a is Node2D and a.is_inside_tree()
+extends RefCounted
 
 func execute(arena: Node2D, params: Dictionary) -> void:
-	if not _arena_alive(arena):
+	if not PatternUtil.arena_alive(arena):
 		return
 
-	var tree: SceneTree = arena.get_tree()
-
-	var spawn_pos: Vector2 = Vector2(640.0, 360.0)
-	if params.has("pos") and params["pos"] is Vector2:
-		spawn_pos = params["pos"]
-	elif params.has("x") or params.has("y"):
-		spawn_pos = Vector2(params.get("x", 640.0), params.get("y", 360.0))
-	else:
-		spawn_pos = params.get("pos", Vector2(640.0, 360.0))
+	var spawn_pos: Vector2 = PatternUtil.get_pos(arena, params)
 
 	var delay: float = params.get("delay", 0.8)
-	var count: int = params.get("count", 12)
-	var rings: int = params.get("rings", 1)
+	var count: int = maxi(int(params.get("count", 12)), 1)
+	var rings: int = maxi(int(params.get("rings", 1)), 1)
 	var radius: float = params.get("radius", 60.0)
 	var radius_step: float = params.get("radius_step", 30.0)
 	var angle_offset_deg: float = params.get("angle_offset", 0.0)
@@ -30,8 +16,8 @@ func execute(arena: Node2D, params: Dictionary) -> void:
 	var speed: float = params.get("speed", 340.0)
 	var trigger_distance: float = params.get("trigger_distance", 10.0)
 	var max_wait: float = params.get("max_wait", 3.0)
-	var hold_color: Color = params.get("hold_color", Color(1.0, 0.3, 0.9, 1.0))
-	var release_color: Color = params.get("release_color", Color(1.0, 1.0, 1.0, 1.0))
+	var hold_color: Color = PatternUtil.to_color(params.get("hold_color"), Color(1.0, 0.3, 0.9, 1.0))
+	var release_color: Color = PatternUtil.to_color(params.get("release_color"), Color(1.0, 1.0, 1.0, 1.0))
 	var bullet_scale: float = params.get("bullet_scale", 1.0)
 	var spread_deg: float = params.get("spread", 20.0)
 	var pulse_period: float = params.get("pulse_period", 0.5)
@@ -42,36 +28,22 @@ func execute(arena: Node2D, params: Dictionary) -> void:
 	var turn_rate_deg: float = params.get("turn_rate", 180.0)
 
 	var viewport_size: Vector2 = arena.get_viewport_rect().size
-	var player: Node = arena.get_node_or_null("player")
 
 	var center: Vector2 = spawn_pos
-	if spawn_on_player and player and is_instance_valid(player):
+	var player: Node2D = PatternUtil.get_player(arena)
+	if spawn_on_player and player != null:
 		center = player.global_position
 
-	var dot: Sprite2D = Sprite2D.new()
-	dot.texture = DOT_TEXTURE
-	dot.global_position = center
-	dot.scale = Vector2(0.3, 0.3)
-	dot.modulate = hold_color
-	arena.add_child(dot)
+	var dot: Sprite2D = PatternUtil.spawn_dot(arena, center, hold_color)
+	await PatternUtil.wait(arena, delay)
+	PatternUtil.free_node(dot)
 
-	var tween: Tween = arena.create_tween()
-	tween.tween_property(dot, "scale", Vector2(0.6, 0.6), 0.2)
-	tween.tween_property(dot, "scale", Vector2(0.3, 0.3), 0.2)
-	tween.set_loops()
-
-	await tree.create_timer(delay).timeout
-
-	if is_instance_valid(tween):
-		tween.kill()
-	if is_instance_valid(dot):
-		dot.queue_free()
-
-	if not _arena_alive(arena):
+	if not PatternUtil.arena_alive(arena):
 		return
 
 	var bullets: Array = []
 	var pulse_tweens: Array = []
+	var fade_in_tweens: Array = []
 
 	for ring in range(rings):
 		var ring_radius: float = radius + float(ring) * radius_step
@@ -79,86 +51,73 @@ func execute(arena: Node2D, params: Dictionary) -> void:
 		var angle_step: float = TAU / float(count)
 
 		for i in range(count):
-			if not _arena_alive(arena):
-				for bt in pulse_tweens:
-					if is_instance_valid(bt):
-						bt.kill()
-				return
-
 			var angle: float = float(i) * angle_step + ring_offset
-			var offset: Vector2 = Vector2.from_angle(angle) * ring_radius
-			var pos: Vector2 = center + offset
+			var pos: Vector2 = center + Vector2.from_angle(angle) * ring_radius
 			pos.x = clampf(pos.x, 12.0, viewport_size.x - 12.0)
 			pos.y = clampf(pos.y, 12.0, viewport_size.y - 12.0)
 
-			var bullet = BULLET_SCENE.instantiate()
-			bullet.global_position = pos
-			bullet.direction = Vector2.ZERO
-			bullet.speed = 0.0
-			arena.bullet_container.add_child(bullet)
+			# Пока ждём игрока, пуля неподвижна (direction = ZERO, speed = 0).
+			var bullet = PatternUtil.spawn_bullet(arena, pos, Vector2.ZERO, 0.0)
 			bullets.append(bullet)
 
-			if bullet is CanvasItem:
-				bullet.modulate = hold_color
-				bullet.modulate.a = 0.0
-				bullet.scale = Vector2(bullet_scale * 0.4, bullet_scale * 0.4)
+			bullet.modulate = hold_color
+			bullet.modulate.a = 0.0
+			bullet.scale = Vector2(bullet_scale * 0.4, bullet_scale * 0.4)
 
-				var ft: Tween = arena.create_tween()
-				ft.tween_property(bullet, "modulate:a", 1.0, fade_in_time)
-				ft.parallel().tween_property(bullet, "scale", Vector2(bullet_scale, bullet_scale), fade_in_time)
+			# Твины привязаны к самой пуле: умирает пуля — умирают и они.
+			var ft: Tween = bullet.create_tween()
+			ft.tween_property(bullet, "modulate:a", 1.0, fade_in_time)
+			ft.parallel().tween_property(bullet, "scale", Vector2(bullet_scale, bullet_scale), fade_in_time)
+			fade_in_tweens.append(ft)
 
-				var bt: Tween = arena.create_tween()
-				bt.set_loops()
-				bt.tween_property(bullet, "modulate:r", release_color.r, pulse_period * 0.5)
-				bt.parallel().tween_property(bullet, "modulate:g", release_color.g, pulse_period * 0.5)
-				bt.parallel().tween_property(bullet, "modulate:b", release_color.b, pulse_period * 0.5)
-				bt.tween_property(bullet, "modulate:r", hold_color.r, pulse_period * 0.5)
-				bt.parallel().tween_property(bullet, "modulate:g", hold_color.g, pulse_period * 0.5)
-				bt.parallel().tween_property(bullet, "modulate:b", hold_color.b, pulse_period * 0.5)
-				pulse_tweens.append(bt)
+			var bt: Tween = bullet.create_tween()
+			bt.set_loops()
+			bt.tween_property(bullet, "modulate:r", release_color.r, pulse_period * 0.5)
+			bt.parallel().tween_property(bullet, "modulate:g", release_color.g, pulse_period * 0.5)
+			bt.parallel().tween_property(bullet, "modulate:b", release_color.b, pulse_period * 0.5)
+			bt.tween_property(bullet, "modulate:r", hold_color.r, pulse_period * 0.5)
+			bt.parallel().tween_property(bullet, "modulate:g", hold_color.g, pulse_period * 0.5)
+			bt.parallel().tween_property(bullet, "modulate:b", hold_color.b, pulse_period * 0.5)
+			pulse_tweens.append(bt)
 
 	var player_start: Vector2 = Vector2.ZERO
-	if player and is_instance_valid(player):
+	if player != null:
 		player_start = player.global_position
 
-	var start_ms: int = Time.get_ticks_msec()
-	var max_wait_ms: int = int(max_wait * 1000.0)
+	# Время копим из delta, а не берём из Time.get_ticks_msec(): так пауза не «съедает» ожидание.
+	var waited: float = 0.0
 	var triggered: bool = false
 
-	while Time.get_ticks_msec() - start_ms < max_wait_ms:
-		if not _arena_alive(arena):
-			for bt in pulse_tweens:
-				if is_instance_valid(bt):
-					bt.kill()
+	while waited < max_wait:
+		player = PatternUtil.get_player(arena)
+		if player != null and player.global_position.distance_to(player_start) >= trigger_distance:
+			triggered = true
+			break
+		waited += await PatternUtil.next_frame(arena)
+		if not PatternUtil.arena_alive(arena):
 			return
-		if player and is_instance_valid(player):
-			if player.global_position.distance_to(player_start) >= trigger_distance:
-				triggered = true
-				break
-		await tree.physics_frame
 
 	for bt in pulse_tweens:
 		if is_instance_valid(bt):
 			bt.kill()
+	# Недоигранное появление не должно перебивать цвет и размер после выстрела.
+	for ft in fade_in_tweens:
+		if is_instance_valid(ft):
+			ft.kill()
 
 	if not triggered:
 		for bullet in bullets:
 			if not is_instance_valid(bullet):
 				continue
-			if bullet is CanvasItem:
-				var fo: Tween = arena.create_tween()
-				fo.tween_property(bullet, "modulate:a", 0.0, fade_out_time)
-				fo.tween_callback(bullet.queue_free)
-			else:
-				bullet.queue_free()
-		await tree.create_timer(fade_out_time).timeout
-		return
-
-	if not _arena_alive(arena):
+			var fo: Tween = bullet.create_tween()
+			fo.tween_property(bullet, "modulate:a", 0.0, fade_out_time)
+			fo.tween_callback(bullet.queue_free)
+		await PatternUtil.wait(arena, fade_out_time)
 		return
 
 	var aim_base: Vector2 = center
-	if player and is_instance_valid(player):
+	player = PatternUtil.get_player(arena)
+	if player != null:
 		aim_base = player.global_position
 
 	var spread_rad: float = deg_to_rad(spread_deg)
@@ -179,44 +138,36 @@ func execute(arena: Node2D, params: Dictionary) -> void:
 		bullet.direction = dir
 		bullet.speed = speed
 
-		if bullet is CanvasItem:
-			bullet.modulate.a = 1.0
-			bullet.modulate.r = release_color.r
-			bullet.modulate.g = release_color.g
-			bullet.modulate.b = release_color.b
-			bullet.scale = Vector2.ONE
+		bullet.modulate = Color(release_color.r, release_color.g, release_color.b, 1.0)
+		bullet.scale = Vector2(bullet_scale, bullet_scale)
 
 	var homing_elapsed: float = 0.0
 	var max_turn_rad: float = deg_to_rad(turn_rate_deg)
+	var delta: float = arena.get_physics_process_delta_time()
 
 	while homing_elapsed < homing_duration:
-		if not _arena_alive(arena):
-			return
-
-		var delta: float = arena.get_physics_process_delta_time()
-		homing_elapsed += delta
-
+		player = PatternUtil.get_player(arena)
 		var has_alive: bool = false
 		for bullet in bullets:
 			if not is_instance_valid(bullet):
 				continue
 			has_alive = true
 
-			if not player or not is_instance_valid(player):
+			if player == null:
 				break
 
 			var to_player: Vector2 = player.global_position - bullet.global_position
 			if to_player == Vector2.ZERO:
 				continue
 
-			var desired_angle: float = to_player.angle()
-			var current_angle: float = bullet.direction.angle()
-			var diff: float = wrapf(desired_angle - current_angle, -PI, PI)
-			var step: float = clampf(diff, -max_turn_rad * delta, max_turn_rad * delta)
-			var new_angle: float = current_angle + step
-			bullet.direction = Vector2.from_angle(new_angle)
+			var diff: float = wrapf(to_player.angle() - bullet.direction.angle(), -PI, PI)
+			var turn: float = clampf(diff, -max_turn_rad * delta, max_turn_rad * delta)
+			bullet.direction = Vector2.from_angle(bullet.direction.angle() + turn)
 
 		if not has_alive:
 			break
 
-		await tree.physics_frame
+		delta = await PatternUtil.next_frame(arena)
+		if not PatternUtil.arena_alive(arena):
+			return
+		homing_elapsed += delta

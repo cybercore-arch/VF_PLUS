@@ -8,22 +8,25 @@ func start_level(path: String) -> void:
 
 func scan_folder(folder_path: String) -> Array[String]:
 	var result: Array[String] = []
+	if folder_path.is_empty():
+		return result
 	var dir = DirAccess.open(folder_path)
 	if not dir:
 		return result
 	
-	dir.list_dir_begin()
-	var file_name = dir.get_next()
-	while file_name != "":
-		if not dir.current_is_dir() and file_name.ends_with(".json"):
+	for file_name in dir.get_files():
+		if file_name.ends_with(".json"):
 			result.append(folder_path.path_join(file_name))
-		file_name = dir.get_next()
 	
 	return result
 
 func get_levels(category: String) -> Array[String]:
 	var official_path = "res://levels/"
-	var custom_path = OS.get_executable_path().get_base_dir().path_join("levels")
+	# В редакторе внешняя папка — корень проекта, в экспорте — папка рядом с игрой.
+	var custom_path = PatternUtil.external_base_dir().path_join("levels")
+	# В редакторе custom_path указывает на ту же папку, что и res://levels/: второй раз её не сканируем.
+	if custom_path.simplify_path().trim_suffix("/") == ProjectSettings.globalize_path(official_path).simplify_path().trim_suffix("/"):
+		custom_path = ""
 	
 	var list: Array[String] = []
 	

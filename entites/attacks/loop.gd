@@ -1,77 +1,62 @@
-extends Node
-
-func _arena_alive(a) -> bool:
-	return is_instance_valid(a) and a is Node2D and a.is_inside_tree()
-
-func _resolve_point(val, arena_node: Node2D) -> Vector2:
-	if val is Vector2:
-		return val
-	if val is String:
-		match val.to_lower():
-			"center":
-				return arena_node.get_viewport_rect().size / 2.0
-			"random":
-				var vp = arena_node.get_viewport_rect().size
-				return Vector2(randf_range(50, vp.x - 50), randf_range(50, vp.y - 50))
-			"player", "aimed":
-				var p = arena_node.get_node_or_null("player")
-				if p and is_instance_valid(p):
-					return p.global_position
-				return arena_node.get_viewport_rect().size / 2.0
-	elif val is Array and val.size() == 2:
-		if (val[0] is float or val[0] is int) and (val[1] is float or val[1] is int):
-			return Vector2(float(val[0]), float(val[1]))
-	return arena_node.get_viewport_rect().size / 2.0
+extends RefCounted
+## Мета-паттерн: запускает другой паттерн несколько раз подряд.
+##
+## Параметры:
+##   target_pattern — имя паттерна (обязательно)
+##   repeat         — сколько раз; 0 или меньше = бесконечно
+##   interval       — пауза между запусками, сек
+##   params         — параметры для вложенного паттерна
+##   step_angle     — на сколько градусов сдвигать start_angle с каждым запуском
+##   step_speed     — на сколько менять speed с каждым запуском
+##   reroll_pos     — true: "pos"/"target" вроде "random" или "player" вычисляются
+##                    заново на КАЖДОМ запуске. false (по умолчанию): один раз в начале.
 
 func execute(arena: Node2D, params: Dictionary) -> void:
-	if not _arena_alive(arena): return
-	var tree: SceneTree = arena.get_tree()
+	if not PatternUtil.arena_alive(arena):
+		return
 
 	var target_pattern_name: String = params.get("target_pattern", "")
 	if target_pattern_name.is_empty():
 		return
+	if PatternUtil.load_pattern(target_pattern_name) == null:
+		push_error("loop: pattern not found: " + target_pattern_name)
+		return
 
-	var repeat_count: int = params.get("repeat", 3)
-	var is_infinite: bool = (repeat_count <= 0)
+	var repeat_count: int = int(params.get("repeat", 3))
+	var is_infinite: bool = repeat_count <= 0
 	var interval: float = params.get("interval", 0.2)
-	var target_params: Dictionary = params.get("params", {}).duplicate(true)
+	if is_infinite:
+		# Бесконечный цикл без ожидания навсегда повесил бы игру.
+		interval = maxf(interval, 0.05)
 	var angle_step: float = params.get("step_angle", 0.0)
 	var speed_step: float = params.get("step_speed", 0.0)
+	var reroll_pos: bool = params.get("reroll_pos", false)
 
-	if target_params.has("pos"):
-		target_params["pos"] = _resolve_point(target_params["pos"], arena)
-	if target_params.has("target"):
-		target_params["target"] = _resolve_point(target_params["target"], arena)
-
-	var external_path = OS.get_executable_path().get_base_dir() + "/patterns/" + target_pattern_name + ".gd"
-	var pattern_script: GDScript = null
-	if FileAccess.file_exists(external_path):
-		pattern_script = load(external_path)
-	else:
-		var internal_path = "res://entites/attacks/" + target_pattern_name + ".gd"
-		if ResourceLoader.exists(internal_path):
-			pattern_script = load(internal_path)
-
-	if not pattern_script:
-		return
+	var inner: Dictionary = params.get("params", {})
+	var base_params: Dictionary = inner.duplicate(true)
+	if not reroll_pos:
+		var center: Vector2 = arena.get_viewport_rect().size / 2.0
+		if base_params.has("pos"):
+			base_params["pos"] = PatternUtil.resolve_point(base_params["pos"], arena, center)
+		if base_params.has("target"):
+			base_params["target"] = PatternUtil.resolve_point(base_params["target"], arena, center)
 
 	var step: int = 0
 	while is_infinite or step < repeat_count:
-		if not _arena_alive(arena): return
-
-		var current_params = target_params.duplicate(true)
+		var current_params: Dictionary = base_params.duplicate(true)
 
 		if angle_step != 0.0:
-			var base_angle = current_params.get("start_angle", 0.0)
-			current_params["start_angle"] = base_angle + (angle_step * step)
+			var base_angle: float = current_params.get("start_angle", 0.0)
+			current_params["start_angle"] = base_angle + angle_step * float(step)
 
 		if speed_step != 0.0:
-			var base_speed = current_params.get("speed", 250.0)
-			current_params["speed"] = base_speed + (speed_step * step)
+			var base_speed: float = current_params.get("speed", 250.0)
+			current_params["speed"] = base_speed + speed_step * float(step)
 
-		var inst = pattern_script.new()
-		inst.execute(arena, current_params)
+		PatternUtil.run_pattern(target_pattern_name, arena, current_params)
 
 		step += 1
 		if interval > 0.0:
-			await tree.create_timer(interval).timeout
+			await PatternUtil.wait(arena, interval)
+			if not PatternUtil.arena_alive(arena):
+				return
