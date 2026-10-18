@@ -37,6 +37,12 @@ func execute(arena: Node2D, params: Dictionary) -> void:
 		"spiral":
 			auto_params["arms"] = randi_range(2, 4)
 			auto_params["duration"] = randf_range(1.5, 2.5)
+		"laser_shot":
+			# лазер стартует не из игрока и не веером из 8–18 штук
+			auto_params["pos"] = ["center", "random"].pick_random()
+			auto_params["count"] = 1
+			auto_params["target"] = "player"
+			auto_params["warn_time"] = randf_range(0.8, 1.2)
 		"rain":
 			auto_params["side"] = ["top", "bottom", "left", "right"].pick_random()
 			auto_params["mode"] = ["gaps", "random"].pick_random()

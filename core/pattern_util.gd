@@ -5,13 +5,14 @@ extends RefCounted
 
 const DOT_TEXTURE: Texture2D = preload("res://assets/sprites/circleWhite.png")
 const BULLET_SCENE: PackedScene = preload("res://entities/bullet/bullet.tscn")
+const LASER_SCENE: PackedScene = preload("res://entities/laser/laser.tscn")
 const INTERNAL_DIR := "res://entities/attacks/"
 const DEFAULT_POS := Vector2(640.0, 360.0)
 
 ## Список встроенных паттернов. Нужен как запасной вариант: в экспортной сборке
 ## DirAccess может показывать скрипты как *.gd.remap или *.gdc.
 const BUILTIN_PATTERNS: Array[String] = [
-	"boomerang", "circle", "minigun", "puppet", "rain", "sakura", "shot", "spiral", "wall",
+	"boomerang", "circle", "laser_shot", "minigun", "puppet", "rain", "sakura", "shot", "spiral", "wall",
 ]
 ## Мета-паттерны не попадают в пул `random`.
 const META_PATTERNS: Array[String] = ["random", "loop"]
@@ -253,6 +254,31 @@ static func spawn_bullet(arena, pos: Vector2, dir: Vector2, speed: float):
 	arena.bullet_container.add_child(bullet)
 	bullet.global_position = pos
 	return bullet
+
+
+## Создаёт лазер: pos — откуда, angle — направление в радианах.
+## opts — параметры лазера (см. laser_options и entities/laser/laser.gd).
+static func spawn_laser(arena, pos: Vector2, angle: float, opts: Dictionary = {}):
+	var laser = LASER_SCENE.instantiate()
+	laser.configure(opts)
+	arena.bullet_container.add_child(laser)
+	laser.global_position = pos
+	laser.global_rotation = angle
+	return laser
+
+
+const LASER_KEYS: Array[String] = [
+	"length", "width", "warn_width", "warn_time", "grow_time", "active_time",
+	"fade_time", "color", "core_color", "warn_alpha", "hit_scale",
+]
+
+## Вытаскивает из params настройки лазера, чтобы любой laser_-паттерн принимал одни и те же ключи.
+static func laser_options(params: Dictionary) -> Dictionary:
+	var opts: Dictionary = {}
+	for k in LASER_KEYS:
+		if params.has(k):
+			opts[k] = params[k]
+	return opts
 
 
 static func make_line(arena, a: Vector2, b: Vector2, color: Color, width: float) -> Line2D:

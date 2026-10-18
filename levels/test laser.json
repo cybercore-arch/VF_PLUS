@@ -1,0 +1,8 @@
+{
+  "events": [
+    { "time": 0.5, "pattern": "laser_shot", "params": { "pos": [100, 100], "target": "player", "warn_time": 1.2 } },
+    { "time": 3.0, "pattern": "laser_shot", "params": { "pos": "center", "target": "player", "track_time": 0.8, "warn_time": 1.2, "color": [0.3, 0.8, 1.0] } },
+    { "time": 6.0, "pattern": "laser_shot", "params": { "pos": [640, 30], "angle": 90, "count": 5, "spread": 60, "width": 20, "warn_time": 1.5, "color": [0.8, 0.4, 1.0] } },
+    { "time": 9.5, "pattern": "laser_shot", "params": { "pos": "random", "target": "player", "warn_time": 0.9, "active_time": 0.8, "width": 45, "color": [1.0, 0.7, 0.1] } }
+  ]
+}
