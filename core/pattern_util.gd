@@ -12,7 +12,7 @@ const DEFAULT_POS := Vector2(640.0, 360.0)
 ## Список встроенных паттернов. Нужен как запасной вариант: в экспортной сборке
 ## DirAccess может показывать скрипты как *.gd.remap или *.gdc.
 const BUILTIN_PATTERNS: Array[String] = [
-	"boomerang", "circle", "laser_shot", "minigun", "puppet", "rain", "sakura", "shot", "spiral", "wall",
+	"boomerang", "circle", "laser_grid", "laser_ring", "laser_shot", "minigun", "puppet", "rain", "sakura", "shot", "spiral", "wall",
 ]
 ## Мета-паттерны не попадают в пул `random`.
 const META_PATTERNS: Array[String] = ["random", "loop"]
@@ -269,7 +269,7 @@ static func spawn_laser(arena, pos: Vector2, angle: float, opts: Dictionary = {}
 
 const LASER_KEYS: Array[String] = [
 	"length", "width", "warn_width", "warn_time", "grow_time", "active_time",
-	"fade_time", "color", "core_color", "warn_alpha", "hit_scale",
+	"fade_time", "color", "warn_alpha", "hit_scale",
 ]
 
 ## Вытаскивает из params настройки лазера, чтобы любой laser_-паттерн принимал одни и те же ключи.

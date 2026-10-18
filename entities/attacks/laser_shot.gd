@@ -10,7 +10,7 @@ extends RefCounted
 ## count и spread — веер из count лазеров на spread градусов.
 ## show_origin — мигающая точка-излучатель в начале луча.
 ## Настройки самого лазера: width, warn_width, warn_time, grow_time, active_time,
-## fade_time, color, core_color, warn_alpha, length, hit_scale.
+## fade_time, color, warn_alpha, length, hit_scale.
 
 func execute(arena: Node2D, params: Dictionary) -> void:
 	if not PatternUtil.arena_alive(arena):

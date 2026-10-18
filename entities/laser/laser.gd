@@ -19,15 +19,13 @@ var grow_time: float = 0.1
 var active_time: float = 0.4
 var fade_time: float = 0.15
 var color: Color = Color(1.0, 0.2, 0.3)
-var core_color: Color = Color(1.0, 1.0, 1.0)  # светлая сердцевина яркого луча
 var warn_alpha: float = 0.3      # прозрачность тусклой линии
 var hit_scale: float = 0.8       # хитбокс = width * hit_scale (чуть мягче, чем выглядит)
 
 var phase: Phase = Phase.WARN
 var _t: float = 0.0
 
-@onready var _glow: Line2D = $Glow
-@onready var _core: Line2D = $Core
+@onready var _beam: Line2D = $Beam
 @onready var _hitbox: CollisionShape2D = $CollisionShape2D
 
 
@@ -43,7 +41,6 @@ func configure(opts: Dictionary) -> void:
 	warn_alpha = float(opts.get("warn_alpha", warn_alpha))
 	hit_scale = float(opts.get("hit_scale", hit_scale))
 	color = PatternUtil.to_color(opts.get("color"), color)
-	core_color = PatternUtil.to_color(opts.get("core_color"), core_color)
 
 
 ## Сколько всего живёт лазер от появления до удаления.
@@ -52,8 +49,7 @@ func total_time() -> float:
 
 
 func _ready() -> void:
-	_glow.points = PackedVector2Array([Vector2.ZERO, Vector2(length, 0.0)])
-	_core.points = PackedVector2Array([Vector2.ZERO, Vector2(length, 0.0)])
+	_beam.points = PackedVector2Array([Vector2.ZERO, Vector2(length, 0.0)])
 	var rect := RectangleShape2D.new()
 	rect.size = Vector2(length, maxf(width * hit_scale, 1.0))
 	_hitbox.shape = rect
@@ -107,8 +103,5 @@ func _update_visuals() -> void:
 			var k2: float = clampf(_t / maxf(fade_time, 0.0001), 0.0, 1.0)
 			w = width * (1.0 - k2)
 			a = 1.0 - k2
-	_glow.width = w
-	_glow.default_color = Color(color.r, color.g, color.b, a * color.a)
-	_core.visible = phase != Phase.WARN
-	_core.width = w * 0.45
-	_core.default_color = Color(core_color.r, core_color.g, core_color.b, a * core_color.a)
+	_beam.width = w
+	_beam.default_color = Color(color.r, color.g, color.b, a * color.a)

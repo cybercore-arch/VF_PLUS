@@ -43,6 +43,16 @@ func execute(arena: Node2D, params: Dictionary) -> void:
 			auto_params["count"] = 1
 			auto_params["target"] = "player"
 			auto_params["warn_time"] = randf_range(0.8, 1.2)
+		"laser_grid":
+			auto_params["rows"] = randi_range(2, 5)
+			auto_params["cols"] = randi_range(3, 7)
+			auto_params["skip"] = randi_range(0, 2)
+			auto_params["warn_time"] = randf_range(1.2, 1.8)
+		"laser_ring":
+			auto_params["pos"] = ["center", "random"].pick_random()
+			auto_params["count"] = randi_range(4, 10)
+			auto_params["spin"] = [0.0, 40.0, -40.0].pick_random()
+			auto_params["warn_time"] = randf_range(1.2, 1.8)
 		"rain":
 			auto_params["side"] = ["top", "bottom", "left", "right"].pick_random()
 			auto_params["mode"] = ["gaps", "random"].pick_random()
