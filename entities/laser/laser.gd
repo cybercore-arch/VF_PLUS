@@ -21,6 +21,7 @@ var fade_time: float = 0.15
 var color: Color = Color(1.0, 0.2, 0.3)
 var warn_alpha: float = 0.3      # прозрачность тусклой линии
 var hit_scale: float = 0.8       # хитбокс = width * hit_scale (чуть мягче, чем выглядит)
+var destroys_bullets: bool = true  # активный луч уничтожает пули, которых коснётся
 
 var phase: Phase = Phase.WARN
 var _t: float = 0.0
@@ -40,6 +41,7 @@ func configure(opts: Dictionary) -> void:
 	fade_time = float(opts.get("fade_time", fade_time))
 	warn_alpha = float(opts.get("warn_alpha", warn_alpha))
 	hit_scale = float(opts.get("hit_scale", hit_scale))
+	destroys_bullets = bool(opts.get("destroys_bullets", destroys_bullets))
 	color = PatternUtil.to_color(opts.get("color"), color)
 
 
@@ -72,6 +74,8 @@ func _physics_process(delta: float) -> void:
 		for a in get_overlapping_areas():
 			if a.has_method("die"):
 				a.die()
+			elif destroys_bullets and a.has_method("destroy"):
+				a.destroy()
 
 
 func _duration(p: Phase) -> float:

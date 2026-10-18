@@ -269,7 +269,7 @@ static func spawn_laser(arena, pos: Vector2, angle: float, opts: Dictionary = {}
 
 const LASER_KEYS: Array[String] = [
 	"length", "width", "warn_width", "warn_time", "grow_time", "active_time",
-	"fade_time", "color", "warn_alpha", "hit_scale",
+	"fade_time", "color", "warn_alpha", "hit_scale", "destroys_bullets",
 ]
 
 ## Вытаскивает из params настройки лазера, чтобы любой laser_-паттерн принимал одни и те же ключи.
