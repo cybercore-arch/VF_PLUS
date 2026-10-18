@@ -7,7 +7,7 @@
 
 При запуске из редактора Godot вторая папка — это корень проекта, то есть `res://levels/` и просто `levels/` совпадают. При запуске собранной игры `levels/` — это папка рядом с `.exe`.
 
-> **Для экспорта:** в Export → Resources → *Filters to export non-resource files/folders* добавь `*.json`, иначе встроенные уровни не попадут в сборку.
+> **Для экспорта:** в Export → Resources → *Filters to export non-resource files/folders* сделаю позже `*.json`, иначе встроенные уровни не попадут в сборку. 
 
 ## Категории уровней
 
