@@ -37,6 +37,11 @@ func execute(arena: Node2D, params: Dictionary) -> void:
 		"spiral":
 			auto_params["arms"] = randi_range(2, 4)
 			auto_params["duration"] = randf_range(1.5, 2.5)
+		"rain":
+			auto_params["side"] = ["top", "bottom", "left", "right"].pick_random()
+			auto_params["mode"] = ["gaps", "random"].pick_random()
+			auto_params["duration"] = randf_range(3.0, 5.0)
+			auto_params["gap_size"] = randf_range(170.0, 240.0)
 		"sakura":
 			auto_params["side"] = ["top", "left", "right"].pick_random()
 			auto_params["count"] = randi_range(15, 25)

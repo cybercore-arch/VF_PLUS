@@ -11,7 +11,7 @@ const DEFAULT_POS := Vector2(640.0, 360.0)
 ## Список встроенных паттернов. Нужен как запасной вариант: в экспортной сборке
 ## DirAccess может показывать скрипты как *.gd.remap или *.gdc.
 const BUILTIN_PATTERNS: Array[String] = [
-	"boomerang", "circle", "minigun", "puppet", "sakura", "shot", "spiral", "wall",
+	"boomerang", "circle", "minigun", "puppet", "rain", "sakura", "shot", "spiral", "wall",
 ]
 ## Мета-паттерны не попадают в пул `random`.
 const META_PATTERNS: Array[String] = ["random", "loop"]
