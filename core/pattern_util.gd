@@ -219,8 +219,14 @@ static func run_pattern(pattern_name: String, arena, raw_params: Dictionary) -> 
 	# Старые моды могли быть `extends Node`: вешаем их на арену, чтобы не текли.
 	if inst is Node:
 		arena.add_child(inst)
-	inst.execute(arena, prepare_params(raw_params, arena))
+	_run_instance(inst, arena, prepare_params(raw_params, arena))
 	return true
+
+
+## Держит экземпляр паттерна в памяти, пока работает его execute().
+## Без этого RefCounted-объект освобождается сразу после запуска, и паттерн, ждущий в await, никогда не продолжится.
+static func _run_instance(inst, arena, params: Dictionary) -> void:
+	await inst.execute(arena, params)
 
 
 # ---------------------------------------------------------------- спавн
