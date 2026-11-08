@@ -1,0 +1,8 @@
+{
+  "events": [
+    { "time": 0.5, "pattern": "rain", "params": { "side": "top", "mode": "gaps", "duration": 7.0, "gap_size": 220, "gap_motion": "wander", "gap_step": 50, "speed": 190 } },
+    { "time": 9.5, "pattern": "rain", "params": { "side": "bottom", "mode": "gaps", "duration": 7.0, "gap_size": 200, "gap_motion": "sine", "gap_amplitude": 0.35, "gap_period": 5.0, "stagger": true, "speed": 200 } },
+    { "time": 18.0, "pattern": "rain", "params": { "side": "top", "mode": "random", "duration": 8.0, "per_tick": 5, "tick_interval": 0.1, "speed": 230, "speed_variation": 60, "gap_size": 200, "gap_motion": "wander", "sway": 25, "sway_period": 3.0 } },
+    { "time": 28.0, "pattern": "rain", "params": { "side": "left", "mode": "gaps", "duration": 6.0, "gap_size": 190, "gap_motion": "random", "tick_interval": 0.3, "speed": 170, "bullet_color": [1.0, 0.6, 0.8] } }
+  ]
+}

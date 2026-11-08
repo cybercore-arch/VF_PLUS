@@ -37,6 +37,27 @@ func execute(arena: Node2D, params: Dictionary) -> void:
 		"spiral":
 			auto_params["arms"] = randi_range(2, 4)
 			auto_params["duration"] = randf_range(1.5, 2.5)
+		"laser_shot":
+			# лазер стартует не из игрока и не веером из 8–18 штук
+			auto_params["pos"] = ["center", "random"].pick_random()
+			auto_params["count"] = 1
+			auto_params["target"] = "player"
+			auto_params["warn_time"] = randf_range(0.8, 1.2)
+		"laser_grid":
+			auto_params["rows"] = randi_range(2, 5)
+			auto_params["cols"] = randi_range(3, 7)
+			auto_params["skip"] = randi_range(0, 2)
+			auto_params["warn_time"] = randf_range(1.2, 1.8)
+		"laser_ring":
+			auto_params["pos"] = ["center", "random"].pick_random()
+			auto_params["count"] = randi_range(4, 10)
+			auto_params["spin"] = [0.0, 40.0, -40.0].pick_random()
+			auto_params["warn_time"] = randf_range(1.2, 1.8)
+		"rain":
+			auto_params["side"] = ["top", "bottom", "left", "right"].pick_random()
+			auto_params["mode"] = ["gaps", "random"].pick_random()
+			auto_params["duration"] = randf_range(3.0, 5.0)
+			auto_params["gap_size"] = randf_range(170.0, 240.0)
 		"sakura":
 			auto_params["side"] = ["top", "left", "right"].pick_random()
 			auto_params["count"] = randi_range(15, 25)

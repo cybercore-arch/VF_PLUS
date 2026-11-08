@@ -60,6 +60,7 @@
 - `spawn_bullet(arena, pos, dir, speed)` — создаёт пулю и возвращает её.
 - `spawn_dot(arena, pos, color)` — мигающая точка-телеграф. Удали её через `free_node`.
 - `make_line(arena, a, b, color, width)` — линия-телеграф.
+- `spawn_laser(arena, pos, angle, opts)` — создаёт лазер (`angle` в радианах) и возвращает его. `opts` — настройки лазера, их можно собрать из `params` через `laser_options(params)`. Паттерны с лазерами называй с приставкой `laser_`.
 - `side_geometry(side, размер)` и `side_pos(t, geo, отступ)` — геометрия сторон экрана (`wall`, `sakura`).
 
 **Запуск других паттернов**
